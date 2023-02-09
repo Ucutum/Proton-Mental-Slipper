@@ -1,0 +1,18 @@
+{% extends "index.html" %}
+{% block content %}
+
+<h1>Temperature</h1>
+<ul class="unordered-list">
+    {% for name in temp_sensors %}
+    <li>
+        <div>
+            <p sensor>TemperatureSensor_{{ name }} - </p>
+            <div sensor class="temp_sensor" id="{{ name }}">temp</div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+
+<script src="{{ url_for('static', filename='js/sensors.js') }}"></script>
+
+{% endblock %}

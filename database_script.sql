@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS [temp] (
+    day    INTEGER NOT NULL,
+    month  INTEGER NOT NULL,
+    year   INTEGER NOT NULL,
+    second INTEGER NOT NULL,
+    minute INTEGER NOT NULL,
+    source STRING  NOT NULL,
+    VALUE  INTEGER NOT NULL
+);
