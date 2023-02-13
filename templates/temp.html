@@ -1,12 +1,23 @@
 {% extends "index.html" %}
 {% block content %}
 
-<!-- <link rel="stylesheet" href="{{ url_for('static', filename='/css/dashboard.css') }}"> -->
-
-<h1>All data</h1>
+<h1>Temperature Graph</h1>
 
 <image src="{{ url_for('static', filename='graph.png') }}" width="50%"></image>
 
+<h1>Temperature Online</h1>
+<ul class="unordered-list">
+    {% for name in temp_sensors %}
+    <li>
+        <div>
+            <p sensor>TemperatureSensor_{{ name }} - </p>
+            <div sensor class="temp_sensor" id="{{ name }}">temp</div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+
+<h1>Temperature Table</h1>
 <table class="table table-striped">
     <thead>
     <tr>
@@ -24,10 +35,6 @@
     {% endfor %}
 </table>
 
-<!-- <canvas class="my-4 w-100 chartjs-render-monitor" id="myChart" width="566" height="238"
-    style="display: block; width: 566px; height: 238px;">
-</canvas> -->
-
-<!-- <script scr="{{ url_for('static', filename='/js/dashboard.js') }}"></script> -->
+<script src="{{ url_for('static', filename='js/sensors.js') }}"></script>
 
 {% endblock %}

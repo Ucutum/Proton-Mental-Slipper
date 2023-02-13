@@ -6,7 +6,7 @@ def rgbtohex(*color):
     return '#' + ''.join(f'{i:02X}' for i in color)
 
 
-def make_graph(data, headers, w=300, h=300):
+def make_graph(data, headers, path):
     mx_len = max(map(len, data))
     mx_y = max(map(max, data))
     mn_y = min(map(min, data))
@@ -35,7 +35,7 @@ def make_graph(data, headers, w=300, h=300):
         xlim=(0, mx_len + 10), xticks=np.arange(1, mx_len + 10),
         ylim=(mn_y - 2, mx_y + 2), yticks=np.arange(mn_y - 2, mx_y + 2))
 
-    plt.savefig('graph.png')
+    plt.savefig(path)
 
 
 if __name__ == "__main__":
