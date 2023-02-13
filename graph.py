@@ -20,37 +20,27 @@ def make_graph(data, headers, w=300, h=300):
     for i in range(len(data)):
         x = np.arange(0, len(data[i]), 1)
         y = np.array(data[i])
-        print(x, y)
 
         ax.plot(x, y, linewidth=2.0, color=rgbtohex(r, g, b))
         b += 10
         b %= 256
         g += 40
         g %= 256
-        r += 5
+        r += 2
         r %= 256
 
     ax.legend(headers)
 
-
-    # color = plt.rainbow(np.linspace(0, 1, n))
-    # for i, c in zip(range(n), color):
-    #     ax.plot(x, y,c=c)
-
-    # color=iter(cm.rainbow(np.linspace(0,1,n)))
-    # c=next(color)
-    # plt.plot(x,y,c=c)
-
-
     ax.set(
-        xlim=(0, mx_len + 1), xticks=np.arange(1, mx_len + 1),
+        xlim=(0, mx_len + 10), xticks=np.arange(1, mx_len + 10),
         ylim=(mn_y - 2, mx_y + 2), yticks=np.arange(mn_y - 2, mx_y + 2))
 
     plt.savefig('graph.png')
 
 
-data = [
-    [0, 1, 3, 5], [3, 4, 2, 5], [6, 4, 5, 3, 6, 3],
-    [-10, -9, -5, 1, 4, 8], [-6, -4, -7]]
-headers = ["temp1", "arkotemp", "arkana", "inferno", "freeze"]
-make_graph(data, headers)
+if __name__ == "__main__":
+    data = [
+        [0, 1, 3, 5], [3, 4, 2, 5, 0, 0], [6, 4, 5, 3, 6, 3],
+        [-10, -9, -5, 1, 4, 8], [-6, -4, -7, 0]]
+    headers = ["temp1", "arkotemp", "arkana", "inferno", "freeze"]
+    make_graph(data, headers)
