@@ -1,0 +1,33 @@
+{% extends "index.html" %}
+{% block content %}
+
+<!-- <link rel="stylesheet" href="{{ url_for('static', filename='/css/dashboard.css') }}"> -->
+
+<h1>All data</h1>
+
+<image src="{{ url_for('static', filename='graph.png') }}" width="50%"></image>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+    {% for item in datahead %}
+        <th scope="col">{{ item }}</th>
+    {% endfor %}
+    </tr>
+    </thead>
+    {% for row in data %}
+    <tr>
+        {% for item in row %}
+            <th>{{ item }}</th>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+
+<!-- <canvas class="my-4 w-100 chartjs-render-monitor" id="myChart" width="566" height="238"
+    style="display: block; width: 566px; height: 238px;">
+</canvas> -->
+
+<!-- <script scr="{{ url_for('static', filename='/js/dashboard.js') }}"></script> -->
+
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "index.html" %}
+{% block content %}
+
+<h1>Temperature Graph</h1>
+
+<image src="{{ url_for('static', filename='graph.png') }}" width="50%"></image>
+
+<h1>Temperature Online</h1>
+<ul class="unordered-list">
+    {% for name in temp_sensors %}
+    <li>
+        <div>
+            <p sensor>TemperatureSensor_{{ name }} - </p>
+            <div sensor class="temp_sensor" id="{{ name }}">temp</div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+
+<h1>Temperature Table</h1>
+<table class="table table-striped">
+    <thead>
+    <tr>
+    {% for item in datahead %}
+        <th scope="col">{{ item }}</th>
+    {% endfor %}
+    </tr>
+    </thead>
+    {% for row in data %}
+    <tr>
+        {% for item in row %}
+            <th>{{ item }}</th>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+
+<script src="{{ url_for('static', filename='js/sensors.js') }}"></script>
+
+{% endblock %}
