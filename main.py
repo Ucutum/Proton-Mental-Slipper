@@ -43,6 +43,10 @@ def contact():
 def alldata():
     pass
 
+@app.route("/adddata")
+def adddata():
+    pass
+
 
 @app.route("/temp")
 def temp():
