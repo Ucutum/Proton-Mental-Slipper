@@ -1,0 +1,22 @@
+{% extends "index.html" %}
+{% block content %}
+
+<link rel="stylesheer" href="{{ url_for('static', filename='dashboard/dashboard.css') }}">
+
+<h1>Test</h1>
+
+<select class="form-select" aria-label="Пример выбора по умолчанию"
+    style="max-width: 300px" id="load_data_select">
+  <option value="day" selected>За этот день</option>
+  <option value="month">За это месяц</option>
+  <option value="year">За этот год</option>
+  <option value="all">За все время</option>
+</select>
+
+<canvas class="my-4 w-100 chartjs-render-monitor" id="myChart" width="628" height="265" style="display: block; width: 628px; height: 265px;"></canvas>
+
+<script src="{{ url_for('static', filename='dashboard/feather.min.js') }}"></script>	
+<script src="{{ url_for('static', filename='dashboard/Chart.min.js') }}"></script>	
+<script src="{{ url_for('static', filename='dashboard/dashboard.js') }}"></script>	
+
+{% endblock %}

@@ -1,4 +1,4 @@
-var sensors = document.getElementsByClassName("temp_sensor")
+var select = document.getElementsByClassName("temp_sensor")
 
 const temp_url = "http://127.0.0.1:5000/api/temp/"
 
@@ -6,14 +6,14 @@ const temp_url = "http://127.0.0.1:5000/api/temp/"
 var is_working = true
 
 async function updateSensors () {
-    for (let i = 0; i < sensors.length; i++) {
+    for (let i = 0; i < select.length; i++) {
         var xhr = new XMLHttpRequest()
-        xhr.open("GET", temp_url + (i + 1).toString(), false)
+        xhr.open("GET", data_url + (i + 1).toString(), false)
 
         xhr.onload = function() {
             console.log(`Загружено: ${xhr.status} ${xhr.response}`);
             var cont = JSON.parse(xhr.response)
-            var el = sensors[i]
+            var el = select[i]
             el.innerHTML = cont["temp"].toString()
           };
           

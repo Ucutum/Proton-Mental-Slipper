@@ -1,4 +1,5 @@
 import sqlite3
+import datetime
 
 
 class Database:
@@ -11,8 +12,16 @@ class Database:
             VALUES (?, ?, ?, ?);''', (source, date, time, value))
         self.con.commit()
 
-    def get_temp(self, source):
-        self.cur.execute('''SELECT * FROM temp
-            WHERE source = ?
-            ORDER BY date''', (source, ))
-        return self.cur.fetchall()
+    def get_temp(self, source, modif=None):
+        if modif is None:
+            self.cur.execute('''SELECT * FROM temp
+                WHERE source = ?
+                ORDER BY date''', (source, ))
+            return self.cur.fetchall()
+        else:
+            if modif == "day":
+                modif = "%.%." + str(datetime.date.today().day)
+            self.cur.execute('''SELECT * FROM temp
+                WHERE (source = ?) AND (date LIKE ?)
+                ORDER BY date''', (source, modif))
+            return self.cur.fetchall()
