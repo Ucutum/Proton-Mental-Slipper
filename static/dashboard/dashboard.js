@@ -71,11 +71,17 @@ function drawGraph (graph_data) {
 
   for (var i = 0; i < graph_data["data"].length; i++)
   {
+    bw = 4
+    if (graph_data["headers"][i].slice(-3) == "med")
+    {
+      bw = 8
+    }
     datasets.push({
+      label: graph_data["headers"][i],
       data: graph_data["data"][i],
       lineTension: 0.6,
       borderColor: rgbToHex(r, g, b),
-      borderWidth: 4,
+      borderWidth: bw,
       pointBackgroundColor: rgbToHex(r, g, b)
     })
 
@@ -115,7 +121,8 @@ function drawGraph (graph_data) {
         }]
       },
       legend: {
-        display: false
+        display: true,
+        position: "left"
       },
       animation: {duration: 1000},
       // hover: {mode: null},

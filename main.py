@@ -65,6 +65,7 @@ def observations():
             f"{now.day}"
         time = f"{now.hour}:{now.minute}:" +\
             f"{now.second}"
+        sum_temp = 0
         for source in range(1, 5):
             temp = json.loads(
                 requests.get(
@@ -73,7 +74,9 @@ def observations():
                     ).content
                     )["temperature"]
             print(temp, end=" ")
-            db.add_temp(str(source), date, time, temp)
+            sum_temp += temp
+            db.add_temp("temp_" + str(source), date, time, temp)
+        db.add_temp("temp_med", date, time, sum_temp / 4)
         print()
         print("observation")
         sleep(10)
@@ -155,11 +158,11 @@ def api_temp(name):
 @app.route("/api/get_data/<modif>")
 def api_get_data(modif):
     db = Database(get_db())
-    data = [list(map(lambda x: x[-1], db.get_temp(i, modif))) for i in range(1, 5)]
-    times = list(map(lambda x: x[2], db.get_temp(1, modif)))
+    sensors = ["temp_1", "temp_2", "temp_3", "temp_4", "temp_med"]
+    data = [list(map(lambda x: x[-1], db.get_temp(i, modif))) for i in sensors]
+    times = list(map(lambda x: x[2], db.get_temp(sensors[-1], modif)))
     print(data)
-    datahead = ["temp" + str(i) for i in range(1, 5)]
-    return {"data": data, "times": times, "headers": datahead}
+    return {"data": data, "times": times, "headers": sensors}
 
 
 @app.route("/adddata", methods=["GET", "POST"])
