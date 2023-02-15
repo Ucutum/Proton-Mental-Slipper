@@ -1,9 +1,28 @@
 /* globals Chart:false, feather:false */
 
+var datatype = "temp"
+
+function defineDatatype()
+{
+  if (document.getElementById("datatype_temp")) {
+    datatype = "temp"
+  }
+  else if (document.getElementById("datatype_air")) {
+    datatype = "air"
+  }
+  else if (document.getElementById("datatype_soil")) {
+    datatype = "soil"
+  }
+
+  console.log(datatype)
+}
+
+defineDatatype()
+
 var select = document.getElementById("load_data_select")
 var chard_container = document.getElementById("chart-container")
 
-const data_url = "http://127.0.0.1:5000/api/get_data/"
+const data_url = "http://127.0.0.1:5000/api/get_data/" + datatype + "/"
 
 var is_working = true
 
@@ -65,11 +84,39 @@ function drawGraph (graph_data) {
   // eslint-disable-next-line no-unused-vars
 
   var datasets = []
-  var r = 57
-  var g = 100
-  var b = 198
 
-  for (var i = 0; i < graph_data["data"].length; i++)
+  if (datatype == "temp")
+  {
+    var r = 57
+    var g = 100
+    var b = 198
+
+    var rm = 2
+    var gm = 40
+    var bm = 10
+  }
+  else if (datatype == "air")
+  {
+    var r = 255
+    var g = 214
+    var b = 72
+
+    var rm = -2
+    var gm = -40
+    var bm = 10
+  }
+  else if (datatype == "soil")
+  {
+    var r = 105
+    var g = 255
+    var b = 72
+
+    var rm = 2
+    var gm = -40
+    var bm = 10
+  }
+
+  for (var i = graph_data["data"].length - 1; i > -1; i--)
   {
     bw = 4
     if (graph_data["headers"][i].slice(-3) == "med")
@@ -82,14 +129,14 @@ function drawGraph (graph_data) {
       lineTension: 0.6,
       borderColor: rgbToHex(r, g, b),
       borderWidth: bw,
-      pointBackgroundColor: rgbToHex(r, g, b)
+      pointBackgroundColor: rgbToHex(r, g, b),
     })
 
-    b += 10
+    b += bm
     b %= 256
-    g += 40
+    g += gm
     g %= 256
-    r += 2
+    r += rm
     r %= 256
   }
 
@@ -167,4 +214,4 @@ function drawTable(data)
 }
 
 
-setTimeout(loadData, 3000)
+setTimeout(loadData, 1000)

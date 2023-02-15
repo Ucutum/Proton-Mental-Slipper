@@ -44,10 +44,10 @@
 			  			</div>
 			  			<div class="col-lg-6 col-sm-6 col-6 header-top-right">
 							<div class="header-social">
-								<a href="#"><i class="fa fa-facebook"></i></a>
-								<a href="#"><i class="fa fa-twitter"></i></a>
+								<a href="https://github.com/Ucutum/Proton-Mental-Slipper"><i class="fa fa-github"></i></a>
+								<!-- <a href="#"><i class="fa fa-twitter"></i></a>
 								<a href="#"><i class="fa fa-dribbble"></i></a>
-								<a href="#"><i class="fa fa-behance"></i></a>
+								<a href="#"><i class="fa fa-behance"></i></a> -->
 							</div>
 			  			</div>
 			  		</div>			  					
@@ -61,10 +61,11 @@
 				      <nav id="nav-menu-container">
 				        <ul class="nav-menu">
 				          <li><a href="{{ url_for('home') }}">Home</a></li>
-				          <li><a href="{{ url_for('about') }}">About</a></li>
-				          <li><a href="{{ url_for('greenhouse') }}">Greenhouse</a></li>
+						  <li><a href="{{ url_for('greenhouse') }}">Greenhouse</a></li>
+				          <li><a href="{{ url_for('temp') }}">Temp</a></li>
+				          <li><a href="{{ url_for('air') }}">Air</a></li>
+				          <li><a href="{{ url_for('soil') }}">Soil</a></li>
 				          <li><a href="{{ url_for('adddata') }}">AddData</a></li>
-				          <li><a href="{{ url_for('alldata') }}">AllData</a></li>
 				          <!-- <li class="menu-has-children"><a href="">Blog</a>
 				            <ul>
 				              <li><a href="blog-home.html">Blog Home</a></li>
@@ -151,9 +152,15 @@
 										<ul>
 											<li><a href="{{ url_for('greenhouse') }}">GreenHouse</a></li>
 											<li><a href="{{ url_for('adddata') }}">AddData</a></li>
-											<li><a href="{{ url_for('alldata') }}">AllData</a></li>
 										</ul>
-									</div>										
+									</div>		
+									<div class="col">
+										<ul>
+											<li><a href="{{ url_for('temp') }}">Temp</a></li>
+											<li><a href="{{ url_for('air') }}">Air</a></li>
+											<li><a href="{{ url_for('soil') }}">Soil</a></li>
+										</ul>
+									</div>								
 								</div>							
 							</div>
 						</div>							
@@ -196,10 +203,11 @@
 Copyright &copy; 2023 GreenHouse | template by <a href="https://colorlib.com" target="_blank">Colorlib</a>
 <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></p>
 						<div class="col-lg-4 col-sm-12 footer-social">
-							<a href="#"><i class="fa fa-facebook"></i></a>
+							<a href="https://github.com/Ucutum/Proton-Mental-Slipper"><i class="fa fa-github"></i></a>
+							<!-- <a href="#"><i class="fa fa-facebook"></i></a>
 							<a href="#"><i class="fa fa-twitter"></i></a>
 							<a href="#"><i class="fa fa-dribbble"></i></a>
-							<a href="#"><i class="fa fa-behance"></i></a>
+							<a href="#"><i class="fa fa-behance"></i></a> -->
 						</div>
 					</div>
 				</div>

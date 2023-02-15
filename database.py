@@ -7,16 +7,16 @@ class Database:
         self.con = con
         self.cur = con.cursor()
 
-    def add_temp(self, source, date, time, value):
-        self.cur.execute('''INSERT INTO temp(source, date, time, val)
-            VALUES (?, ?, ?, ?);''', (source, date, time, value))
+    def add(self, datatype, source, date, time, value):
+        self.cur.execute('''INSERT INTO data(datatype, source, date, time, val)
+            VALUES (?, ?, ?, ?, ?);''', (datatype, source, date, time, value))
         self.con.commit()
 
-    def get_temp(self, source, modif=None):
+    def get(self, datatype, source, modif=None):
         if modif is None:
-            self.cur.execute('''SELECT * FROM temp
-                WHERE source = ?
-                ORDER BY time, date''', (source, ))
+            self.cur.execute('''SELECT * FROM data
+                WHERE (datatype = ?) AND (source = ?)
+                ORDER BY time, date''', (datatype, source, ))
             return self.cur.fetchall()
         else:
             if modif == "day":
@@ -27,7 +27,7 @@ class Database:
                 modif = f"{datetime.date.today().year}.%.%"
             if modif == "all":
                 modif = "%.%.%"
-            self.cur.execute('''SELECT * FROM temp
-                WHERE (source = ?) AND (date LIKE ?)
-                ORDER BY date''', (source, modif))
+            self.cur.execute('''SELECT * FROM data
+                WHERE (datatype = ?) AND (source = ?) AND (date LIKE ?)
+                ORDER BY date''', (datatype, source, modif))
             return self.cur.fetchall()

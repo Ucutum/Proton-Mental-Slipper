@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, g
+from flask import Flask, render_template, request, url_for, g, redirect
 import json
 import requests
 import sqlite3
@@ -17,6 +17,22 @@ app.config.from_object(__name__)
 app.config.update(dict(DATABASE=os.path.join(app.root_path, "database.sqlite")))
 
 X_AUTH_TOKEN = "8HxIhi"
+
+observating = False
+
+SENSORS_TEMP = ["temp_1", "temp_2", "temp_3", "temp_4", "temp_med"]
+SENSORS_AIR = ["air_1", "air_2", "air_3", "air_4", "air_med"]
+SENSORS_SOIL = [
+    "soil_1", "soil_2", "soil_3", "soil_4", "soil_5",
+    "soil_6", "soil_med"]
+SENSOR_TYPES = {
+    "temp": SENSORS_TEMP, "air": SENSORS_AIR,
+    "soil": SENSORS_SOIL}
+SENSORS_API = {
+    "temp": "https://dt.miet.ru/ppo_it/api/temp_hum/",
+    "air": "https://dt.miet.ru/ppo_it/api/temp_hum/",
+    "soil": "https://dt.miet.ru/ppo_it/api/hum/"
+}
 
 
 def connect_db():
@@ -57,6 +73,13 @@ def home():
 
 @app.route("/start_observations")
 def observations():
+    global observating
+
+    if observating:
+        return redirect("home", code=302)
+    else:
+        observating = True
+
     db = Database(get_db())
     print("start observations")
     while True:
@@ -65,20 +88,21 @@ def observations():
             f"{now.day}"
         time = f"{now.hour}:{now.minute}:" +\
             f"{now.second}"
-        sum_temp = 0
-        for source in range(1, 5):
-            temp = json.loads(
-                requests.get(
-                    "https://dt.miet.ru/ppo_it/api/temp_hum/" + str(source),
-                    headers={"X-Auth-Token": X_AUTH_TOKEN}
-                    ).content
-                    )["temperature"]
-            print(temp, end=" ")
-            sum_temp += temp
-            db.add_temp("temp_" + str(source), date, time, temp)
-        db.add_temp("temp_med", date, time, sum_temp / 4)
+        for datatype in ["temp", "air", "soil"]:
+            print("observation", datatype, end="   ")
+            sum_ = 0
+            for source in range(1, len(SENSOR_TYPES[datatype])):
+                d = json.loads(
+                    requests.get(
+                        SENSORS_API[datatype] + str(source),
+                        headers={"X-Auth-Token": X_AUTH_TOKEN}
+                        ).content
+                        )["temperature" if (datatype == "temp") else "humidity"]
+                print(d, end=" ")
+                sum_ += d
+                db.add(datatype, datatype + "_" + str(source), date, time, d)
+            db.add(datatype,  datatype + "_med", date, time, sum_ / (len(SENSOR_TYPES[datatype]) - 1))
         print()
-        print("observation")
         sleep(10)
 
 
@@ -94,41 +118,22 @@ def contact():
 
 @app.route("/alldata")
 def alldata():
-    db = Database(get_db())
-    data = [list(map(lambda x: x[-1], db.get_temp(i))) for i in range(1, 5)]
-    datahead = ["temp" + str(i) for i in range(1, 5)]
-    make_graph(data, datahead, os.path.join(app.root_path, "static", "graph.png"))
-    mxl = max(map(len, data))
-    for i in range(len(data)):
-        while len(data[i]) < mxl:
-            data[i].append("-")
-    tabledata = list(zip(*data))
-    return render_template(
-        "alldata.html", title="All Data", data=tabledata, datahead=datahead)
+    return redirect(url_for("home"), code=302)
 
 
 @app.route("/temp")
 def temp():
-    db = Database(get_db())
-    data = [list(map(lambda x: x[-1], db.get_temp(i))) for i in range(1, 5)]
-    times = list(map(lambda x: x[2], db.get_temp(1)))
-    print(data)
-    datahead = ["temp" + str(i) for i in range(1, 5)]
-    make_graph(data, datahead, os.path.join(app.root_path, "static", "graph.png"))
-    mxl = max(map(len, data))
-    for i in range(len(data)):
-        while len(data[i]) < mxl:
-            data[i].append("-")
-    data.insert(0, times)
-    datahead = ["time"] + datahead
-    tabledata = list(zip(*data))
-
-    sensors = [1, 2, 3, 4]
-    return render_template(
-        "temp.html", title="Temp", data=tabledata, datahead=datahead,
-        temp_sensors=sensors)
+    return redirect(url_for("data", datatype="temp"), code=302)
 
 
+@app.route("/air")
+def air():
+    return redirect(url_for("data", datatype="air"), code=302)
+
+
+@app.route("/soil")
+def soil():
+    return redirect(url_for("data", datatype="soil"), code=302)
 
 
 @app.route("/")
@@ -138,10 +143,10 @@ def greenhouse():
         "greenhouse.html", title="Greenhouse")
 
 
-@app.route("/test")
-def test():
+@app.route("/data/<datatype>")
+def data(datatype):
     return render_template(
-        "test.html", title="Test")
+        "data.html", title=str(datatype).capitalize(), datatype=datatype)
 
 
 @app.route("/api/temp/<name>")
@@ -155,13 +160,12 @@ def api_temp(name):
     return json.dumps({"temp": temp["temperature"]})
 
 
-@app.route("/api/get_data/<modif>")
-def api_get_data(modif):
+@app.route("/api/get_data/<datatype>/<modif>")
+def api_get_data(datatype, modif):
     db = Database(get_db())
-    sensors = ["temp_1", "temp_2", "temp_3", "temp_4", "temp_med"]
-    data = [list(map(lambda x: x[-1], db.get_temp(i, modif))) for i in sensors]
-    times = list(map(lambda x: x[2], db.get_temp(sensors[-1], modif)))
-    print(data)
+    sensors = SENSOR_TYPES.get(datatype, [])
+    data = [list(map(lambda x: x[-1], db.get(datatype, i, modif))) for i in sensors]
+    times = list(map(lambda x: x[3], db.get(datatype, sensors[-1], modif)))
     return {"data": data, "times": times, "headers": sensors}
 
 
@@ -172,11 +176,10 @@ def adddata():
         time = request.form["time"]
         source = request.form.getlist("source")[0]
         value = request.form["value"]
-        db = Database(get_db())
-        db.add_temp(source, date, time, value)
+        # db = Database(get_db())
+        # db.add_temp(source, date, time, value)
     return render_template("adddata.html", title="Add Data")
 
 
 if __name__ == "__main__":
     app.run(debug=True)
-    # create_db()
