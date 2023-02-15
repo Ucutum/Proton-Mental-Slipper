@@ -16,11 +16,17 @@ class Database:
         if modif is None:
             self.cur.execute('''SELECT * FROM temp
                 WHERE source = ?
-                ORDER BY date''', (source, ))
+                ORDER BY time, date''', (source, ))
             return self.cur.fetchall()
         else:
             if modif == "day":
-                modif = "%.%." + str(datetime.date.today().day)
+                modif = f"{datetime.date.today().year}.{datetime.date.today().month}.{datetime.date.today().day}"
+            if modif == "month":
+                modif = f"{datetime.date.today().year}.{datetime.date.today().month}.%"
+            if modif == "year":
+                modif = f"{datetime.date.today().year}.%.%"
+            if modif == "all":
+                modif = "%.%.%"
             self.cur.execute('''SELECT * FROM temp
                 WHERE (source = ?) AND (date LIKE ?)
                 ORDER BY date''', (source, modif))

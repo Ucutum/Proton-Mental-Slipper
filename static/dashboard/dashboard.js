@@ -1,6 +1,7 @@
 /* globals Chart:false, feather:false */
 
 var select = document.getElementById("load_data_select")
+var chard_container = document.getElementById("chart-container")
 
 const data_url = "http://127.0.0.1:5000/api/get_data/"
 
@@ -15,17 +16,19 @@ function rgbToHex(r, g, b) {
   return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
-async function loadData () {
-  console.log(select.value)
+async function loadData (con=true) {
+  var select_value = select.value
+  console.log(select_value)
 
   var xhr = new XMLHttpRequest()
-  xhr.open("GET", data_url + select.value.toString(), false)
+  xhr.open("GET", data_url + select_value.toString(), false)
 
   xhr.onload = function() {
-      console.log(`Загружено: ${xhr.status} ${xhr.response}`);
+      console.log(`Загружено: ${xhr.status}`);
       var cont = JSON.parse(xhr.response)
       console.log(cont)
       drawGraph(cont)
+      drawTable(cont)
     };
     
   xhr.onerror = function() { // происходит, только когда запрос совсем не получилось выполнить
@@ -41,8 +44,8 @@ async function loadData () {
     
     xhr.send( null )
 
-    if (is_working){
-        setTimeout(loadData, 10000)
+    if (is_working && con){
+        setTimeout(loadData, 10 * 1000)
     }
 }
 
@@ -50,10 +53,11 @@ window.onbeforeunload = function() {
     is_working = false
 }
 
-
-var animate = {duration: 1000}
+var last_chart = false
 
 function drawGraph (graph_data) {
+  chard_container.setAttribute("style", "position: relative;" + "width:" + (graph_data["times"].length * 30).toString() + "px" + "; height: 300px");
+
   feather.replace({ 'aria-hidden': 'true' })
 
   // Графики
@@ -69,7 +73,7 @@ function drawGraph (graph_data) {
   {
     datasets.push({
       data: graph_data["data"][i],
-      lineTension: 0,
+      lineTension: 0.6,
       borderColor: rgbToHex(r, g, b),
       borderWidth: 4,
       pointBackgroundColor: rgbToHex(r, g, b)
@@ -83,6 +87,17 @@ function drawGraph (graph_data) {
     r %= 256
   }
 
+  if (last_chart)
+  {
+    last_chart.data = {
+      labels: graph_data["times"],
+      datasets: datasets
+    }
+    last_chart.options.animation = false
+    last_chart.update()
+    return
+  }
+
   var myChart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -90,6 +105,8 @@ function drawGraph (graph_data) {
       datasets: datasets
     },
     options: {
+      // responsive: false,
+      // maintainAspectRatio: false,
       scales: {
         yAxes: [{
           ticks: {
@@ -100,16 +117,46 @@ function drawGraph (graph_data) {
       legend: {
         display: false
       },
-      animation: animate
+      animation: {duration: 1000},
+      // hover: {mode: null},
+      // responsiveAnimationDuration: 0,
+      tooltips: {enabled: false}
     }
   })
 
-  if (animate) {
-    animate = false
-  }
-  else {
-  }
+  last_chart = myChart
 
+}
+
+
+function drawTable(data)
+{
+  datahead = ""
+  datahead += `<th scope='col'>time</th>`
+  for (var i = 0; i < data["headers"].length; i++)
+  {
+    datahead += `<th scope='col'>${ data["headers"][i] }</th>`
+  }
+  datadata = ""
+  for (var i = 0; i < data["times"].length; i++)
+  {
+    s = "<tr>"
+    s += `<th>${data["times"][i]}</th>`
+    for (var j = 0; j < data["headers"].length; j++)
+    {
+      s += `<th>${data["data"][j][i]}</th>`
+    }
+    s += "</tr>"
+    datadata += s
+  }
+  s = `<thead>
+    <tr>
+    ${datahead}
+    </tr>
+    </thead>
+    ${datadata}
+    `
+  document.getElementById("datatable").innerHTML = s
 }
 
 
