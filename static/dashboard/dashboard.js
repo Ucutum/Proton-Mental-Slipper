@@ -46,8 +46,8 @@ async function loadData (con=true) {
       console.log(`Загружено: ${xhr.status}`);
       var cont = JSON.parse(xhr.response)
       console.log(cont)
-      drawGraph(cont)
       drawTable(cont)
+      drawGraph(cont)
     };
     
   xhr.onerror = function() { // происходит, только когда запрос совсем не получилось выполнить
@@ -74,8 +74,36 @@ window.onbeforeunload = function() {
 
 var last_chart = false
 
+const replace_dict = {
+  "temp_1": "Датчик 1",
+  "temp_2": "Датчик 2",
+  "temp_3": "Датчик 3",
+  "temp_4": "Датчик 4",
+  "temp_med": "Средняя температура",
+  "air_1": "Датчик 1",
+  "air_2": "Датчик 2",
+  "air_3": "Датчик 3",
+  "air_4": "Датчик 4",
+  "air_med": "Средняя влажность   ",
+  "soil_1": "Бороздка 1",
+  "soil_2": "Бороздка 2",
+  "soil_3": "Бороздка 3",
+  "soil_4": "Бороздка 4",
+  "soil_5": "Бороздка 5",
+  "soil_6": "Бороздка 6"
+}
+
+function getReplacedElement(e)
+{
+  if (Object.keys(replace_dict).includes(e))
+  {
+    return replace_dict[e]
+  }
+  return e
+}
+
 function drawGraph (graph_data) {
-  chard_width = 140 + graph_data["times"].length * 25
+  chard_width = 300 + Math.max(graph_data["times"].length, 50) * 25
   chard_container.setAttribute("style", "position: relative;" + "width:" + (chard_width).toString() + "px" + "; height: 300px");
 
   feather.replace({ 'aria-hidden': 'true' })
@@ -119,13 +147,14 @@ function drawGraph (graph_data) {
 
   for (var i = graph_data["data"].length - 1; i > -1; i--)
   {
+
     bw = 2
     if (graph_data["headers"][i].slice(-3) == "med")
     {
       bw = 8
     }
     datasets.push({
-      label: graph_data["headers"][i],
+      label: getReplacedElement(graph_data["headers"][i]),
       data: graph_data["data"][i],
       lineTension: 0.6,
       borderColor: rgbToHex(r, g, b),
@@ -139,6 +168,11 @@ function drawGraph (graph_data) {
     g %= 256
     r += rm
     r %= 256
+  }
+
+  while (graph_data["times"].length < 50)
+  {
+    graph_data["times"].push(" ")
   }
 
   if (last_chart)
@@ -187,10 +221,10 @@ function drawGraph (graph_data) {
 function drawTable(data)
 {
   datahead = ""
-  datahead += `<th scope='col'>time</th>`
+  datahead += `<th scope='col'>Время</th>`
   for (var i = 0; i < data["headers"].length; i++)
   {
-    datahead += `<th scope='col'>${ data["headers"][i] }</th>`
+    datahead += `<th scope='col'>${ getReplacedElement(data["headers"][i]) }</th>`
   }
   datadata = ""
   for (var i = 0; i < data["times"].length; i++)
@@ -203,6 +237,17 @@ function drawTable(data)
     }
     s += "</tr>"
     datadata += s
+
+    if (i == 0)
+    {
+      s = `<thead>
+      <tr>
+      ${datahead}
+      </tr>
+      </thead>
+      ${datadata}`
+      document.getElementById("lastdatatable").innerHTML = s
+    }
   }
   s = `<thead>
     <tr>

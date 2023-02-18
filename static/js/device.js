@@ -34,11 +34,31 @@ async function updateDevice(device_name, update=true)
         if (state)
         {
             devise.innerHTML = on_state
+            if (devise.classList.contains("success"))
+            {
+                devise.classList.remove("success")
+                devise.classList.add("danger")
+            }
+            if (devise.classList.contains("success-border"))
+            {
+                devise.classList.remove("success-border")
+                devise.classList.add("danger-border")
+            }
             devise_title.innerHTML = ton_state
         }
         else
         {
             devise.innerHTML = off_state
+            if (devise.classList.contains("danger"))
+            {
+                devise.classList.remove("danger")
+                devise.classList.add("success")
+            }
+            if (devise.classList.contains("danger-border"))
+            {
+                devise.classList.remove("danger-border")
+                devise.classList.add("success-border")
+            }
             devise_title.innerHTML = toff_state
         }
     };

@@ -281,7 +281,9 @@ def api_device_values(par):
 @app.route("/api/get_data/<datatype>/<modif>")
 def api_get_data(datatype, modif):
     db = Database(get_db())
-    sensors = SENSOR_TYPES.get(datatype, [])
+    sensors = SENSOR_TYPES.get(datatype, [])[:]
+    if datatype == "soil":
+        sensors.remove("soil_med")
     data = [list(map(lambda x: x[-1], db.get(datatype, i, modif))) for i in sensors]
     times = list(map(lambda x: x[3], db.get(datatype, sensors[-1], modif)))
     return {"data": data, "times": times, "headers": sensors}

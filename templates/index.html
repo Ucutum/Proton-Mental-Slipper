@@ -55,17 +55,17 @@
 				</div>
 				<div class="container main-menu">
 					<div class="row align-items-center justify-content-between d-flex">
-				      <div id="logo">
+				      <!-- <div id="logo">
 				        <a href="index.html"><img src="{{ url_for('static', filename='img/logo.png') }}" alt="" title="" width="100px" height="70px" /></a>
-				      </div>
+				      </div> -->
 				      <nav id="nav-menu-container">
 				        <ul class="nav-menu">
-				          <li><a href="{{ url_for('home') }}">Home</a></li>
-						  <li><a href="{{ url_for('greenhouse') }}">Greenhouse</a></li>
-				          <li><a href="{{ url_for('temp') }}">Temp</a></li>
-				          <li><a href="{{ url_for('air') }}">Air</a></li>
-				          <li><a href="{{ url_for('soil') }}">Soil</a></li>
-				          <li><a href="{{ url_for('adddata') }}">AddData</a></li>
+				          <li><a href="{{ url_for('home') }}">Домашняя страница</a></li>
+						  <li><a href="{{ url_for('greenhouse') }}">Управление теприцей</a></li>
+				          <li><a href="{{ url_for('temp') }}">Температура воздуха</a></li>
+				          <li><a href="{{ url_for('air') }}">Влажность воздуха</a></li>
+				          <li><a href="{{ url_for('soil') }}">Влажность почвы</a></li>
+				          <li><a href="{{ url_for('adddata') }}">Добавить значения</a></li>
 				          <!-- <li class="menu-has-children"><a href="">Blog</a>
 				            <ul>
 				              <li><a href="blog-home.html">Blog Home</a></li>
@@ -83,7 +83,7 @@
 						          </li>					                		
 				            </ul>
 				          </li>					          					          		           -->
-				          <li><a href="{{ url_for('contact') }}">Contact</a></li>
+				          <li><a href="{{ url_for('contact') }}">Контакты</a></li>
 				        </ul>
 				      </nav><!-- #nav-menu-container -->					      		  
 					</div>
@@ -143,22 +143,22 @@
 								<div class="row">
 									<div class="col">
 										<ul>
-											<li><a href="{{ url_for('home') }}">Home</a></li>
-											<li><a href="{{ url_for('about') }}">About</a></li>
-											<li><a href="{{ url_for('contact') }}">Contact</a></li>
+											<li><a href="{{ url_for('home') }}">Домашняя страница</a></li>
+											<li><a href="{{ url_for('about') }}">О нас</a></li>
+											<li><a href="{{ url_for('contact') }}">Контакты</a></li>
 										</ul>
 									</div>
 									<div class="col">
 										<ul>
-											<li><a href="{{ url_for('greenhouse') }}">GreenHouse</a></li>
-											<li><a href="{{ url_for('adddata') }}">AddData</a></li>
+											<li><a href="{{ url_for('greenhouse') }}">Управление теприцей</a></li>
+											<li><a href="{{ url_for('adddata') }}">Добавить значения</a></li>
 										</ul>
 									</div>		
 									<div class="col">
 										<ul>
-											<li><a href="{{ url_for('temp') }}">Temp</a></li>
-											<li><a href="{{ url_for('air') }}">Air</a></li>
-											<li><a href="{{ url_for('soil') }}">Soil</a></li>
+											<li><a href="{{ url_for('temp') }}">Температура воздуха</a></li>
+											<li><a href="{{ url_for('air') }}">Влажность воздуха</a></li>
+											<li><a href="{{ url_for('soil') }}">Влажность почвы</a></li>
 										</ul>
 									</div>								
 								</div>							
