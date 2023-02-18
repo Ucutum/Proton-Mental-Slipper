@@ -64,7 +64,7 @@ async function loadData (con=true) {
     xhr.send( null )
 
     if (is_working && con){
-        setTimeout(loadData, 10 * 1000)
+        setTimeout(loadData, 1 * 1000)
     }
 }
 
@@ -75,7 +75,8 @@ window.onbeforeunload = function() {
 var last_chart = false
 
 function drawGraph (graph_data) {
-  chard_container.setAttribute("style", "position: relative;" + "width:" + (graph_data["times"].length * 30).toString() + "px" + "; height: 300px");
+  chard_width = 140 + graph_data["times"].length * 25
+  chard_container.setAttribute("style", "position: relative;" + "width:" + (chard_width).toString() + "px" + "; height: 300px");
 
   feather.replace({ 'aria-hidden': 'true' })
 
@@ -118,7 +119,7 @@ function drawGraph (graph_data) {
 
   for (var i = graph_data["data"].length - 1; i > -1; i--)
   {
-    bw = 4
+    bw = 2
     if (graph_data["headers"][i].slice(-3) == "med")
     {
       bw = 8
@@ -159,7 +160,7 @@ function drawGraph (graph_data) {
     },
     options: {
       // responsive: false,
-      // maintainAspectRatio: false,
+      maintainAspectRatio: false,
       scales: {
         yAxes: [{
           ticks: {

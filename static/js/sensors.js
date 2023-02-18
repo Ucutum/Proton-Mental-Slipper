@@ -5,7 +5,7 @@ const temp_url = "http://127.0.0.1:5000/api/temp/"
 
 var is_working = true
 
-async function updateSensors () {
+async function updateData () {
     for (let i = 0; i < select.length; i++) {
         var xhr = new XMLHttpRequest()
         xhr.open("GET", data_url + (i + 1).toString(), false)
@@ -32,7 +32,7 @@ async function updateSensors () {
     }
 
     if (is_working){
-        setTimeout(updateSensors, 300)
+        setTimeout(updateData, 300)
     }
 }
 
@@ -41,4 +41,4 @@ window.onbeforeunload = function() {
 }
 
 
-setTimeout(updateSensors, 10)
+setTimeout(updateData, 10)

@@ -68,7 +68,8 @@ def index():
 
 @app.route("/home")
 def home():
-    return render_template("home.html", title="Home")
+    global observating
+    return render_template("home.html", title="Home", observations=observating)
 
 
 @app.route("/start_observations")
@@ -84,10 +85,10 @@ def observations():
     print("start observations")
     while True:
         now = datetime.datetime.now()
-        date = f"{now.year}.{now.month}." +\
-            f"{now.day}"
-        time = f"{now.hour}:{now.minute}:" +\
-            f"{now.second}"
+        date = f"{str(now.year).rjust(2, '0')}.{str(now.month).rjust(2, '0')}." +\
+            f"{str(now.day).rjust(2, '0')}"
+        time = f"{str(now.hour).rjust(2, '0')}:{str(now.minute).rjust(2, '0')}:" +\
+            f"{str(now.second).rjust(2, '0')}"
         for datatype in ["temp", "air", "soil"]:
             print("observation", datatype, end="   ")
             sum_ = 0
@@ -103,7 +104,7 @@ def observations():
                 db.add(datatype, datatype + "_" + str(source), date, time, d)
             db.add(datatype,  datatype + "_med", date, time, sum_ / (len(SENSOR_TYPES[datatype]) - 1))
         print()
-        sleep(10)
+        sleep(1)
 
 
 @app.route("/about")
@@ -136,11 +137,74 @@ def soil():
     return redirect(url_for("data", datatype="soil"), code=302)
 
 
-@app.route("/")
-@app.route("/greenhouse")
+device_api_patch_urls = {
+    "window": "https://dt.miet.ru/ppo_it/api/fork_drive",
+    "humidification": "https://dt.miet.ru/ppo_it/api/total_hum",
+    "watering_1": "https://dt.miet.ru/ppo_it/api/watering",
+    "watering_2": "https://dt.miet.ru/ppo_it/api/watering",
+    "watering_3": "https://dt.miet.ru/ppo_it/api/watering",
+    "watering_4": "https://dt.miet.ru/ppo_it/api/watering",
+    "watering_5": "https://dt.miet.ru/ppo_it/api/watering",
+    "watering_6": "https://dt.miet.ru/ppo_it/api/watering"
+}
+
+device_api_get_urls = {
+    "window": False,
+    "humidification": False,
+    "watering_1": False,
+    "watering_2": False,
+    "watering_3": False,
+    "watering_4": False,
+    "watering_5": False,
+    "watering_6": False
+}
+
+device_statuses = {
+    "window": False,
+    "humidification": False,
+    "watering_1": False,
+    "watering_2": False,
+    "watering_3": False,
+    "watering_4": False,
+    "watering_5": False,
+    "watering_6": False
+}
+
+
+def patch_device(device, attr):
+    if device == "window":
+        url = "https://dt.miet.ru/ppo_it/api/fork_drive/"
+        par = {}
+    elif device == "humidification":
+        url = "https://dt.miet.ru/ppo_it/api/total_hum"
+        par = {}
+    elif device[:-2] == "watering":
+        url = "https://dt.miet.ru/ppo_it/api/watering"
+        par = {"id": int(device[-1])}
+    par["state"] = int(attr)
+    par["X-Auth-Token"] = X_AUTH_TOKEN
+    requests.patch(url, par)
+
+
+@app.route("/", methods=["GET", "POST"])
+@app.route("/greenhouse", methods=["GET", "POST"])
 def greenhouse():
+    global device_statuses
+
+    if request.method == "POST":
+        d = json.loads(request.data)
+
+        if not d["update"]:
+            return json.dumps({"state": device_statuses.get(d["devise"], False)})
+
+        for attr in device_statuses.keys():
+            if d["devise"] == attr:
+                device_statuses[attr] = not device_statuses[attr]
+                patch_device(attr, device_statuses[attr])
+                return json.dumps({"state": device_statuses[attr]})
+        return json.dumps({"state": False})
     return render_template(
-        "greenhouse.html", title="Greenhouse")
+        "greenhouse.html", title="Greenhouse", states=device_statuses)
 
 
 @app.route("/data/<datatype>")
@@ -149,8 +213,38 @@ def data(datatype):
         "data.html", title=str(datatype).capitalize(), datatype=datatype)
 
 
+def get_temp_med():
+    a = 0
+    for i in range(1, len(SENSORS_TEMP) - 1 + 1):
+        temp = json.loads(
+            requests.get(
+                "https://dt.miet.ru/ppo_it/api/temp_hum/" + str(i),
+                headers={"X-Auth-Token": X_AUTH_TOKEN}
+                ).content
+                )["temperature"]
+        a += temp
+    a /= len(SENSORS_TEMP) - 1
+    return a
+
+
+def get_air_med():
+    a = 0
+    for i in range(1, len(SENSORS_AIR) - 1 + 1):
+        air = json.loads(
+            requests.get(
+                "https://dt.miet.ru/ppo_it/api/temp_hum/" + str(i),
+                headers={"X-Auth-Token": X_AUTH_TOKEN}
+                ).content
+                )["humidity"]
+        a += air
+    a /= len(SENSORS_AIR) - 1
+    return a
+
+
 @app.route("/api/temp/<name>")
 def api_temp(name):
+    if name == "med":
+        return json.dumps({"temp": get_temp_med()})
     temp = json.loads(
         requests.get(
             "https://dt.miet.ru/ppo_it/api/temp_hum/" + str(name),
@@ -158,6 +252,30 @@ def api_temp(name):
             ).content
             )
     return json.dumps({"temp": temp["temperature"]})
+
+
+@app.route("/api/device_values/<par>")
+def api_device_values(par):
+    i = par[-1:]
+    if par[:-2] == "temp":
+        d = round(json.loads(
+            requests.get(
+                "https://dt.miet.ru/ppo_it/api/temp_hum/" + str(i),
+                headers={"X-Auth-Token": X_AUTH_TOKEN}).content
+                )["temperature"], 2)
+    elif par[:-2] == "air":
+        d = round(json.loads(
+            requests.get(
+                "https://dt.miet.ru/ppo_it/api/temp_hum/" + str(i),
+                headers={"X-Auth-Token": X_AUTH_TOKEN}).content
+                )["humidity"], 2)
+    elif par[:-2] == "soil":
+        d = round(json.loads(
+            requests.get(
+                "https://dt.miet.ru/ppo_it/api/hum/" + str(i),
+                headers={"X-Auth-Token": X_AUTH_TOKEN}).content
+                )["humidity"], 2)
+    return json.dumps({"val": d})
 
 
 @app.route("/api/get_data/<datatype>/<modif>")
@@ -178,6 +296,7 @@ def adddata():
         value = request.form["value"]
         # db = Database(get_db())
         # db.add_temp(source, date, time, value)
+        # .rjust(2, '0')
     return render_template("adddata.html", title="Add Data")
 
 

@@ -3,4 +3,16 @@
 
 <h1>Home</h1>
 
+{% if not observations %}
+    <p>Начните наблюдение, что бы начать собирать данные с датчиков вашей теплицы.</p>
+    <button type="button" class="btn btn-warning btn-lg" onclick="startObservations()">Начать наблюдение</button>
+    <script src="{{ url_for('static', filename='js/start_observations.js') }}"></script>
+{% else %}
+    <div class="alert alert-warning" role="alert">
+        <p>Соединение с вашей теплицей успешно установлено!</p>
+        <p>Для наблюдения за показаниями датчиков используйте главное меню сайта.</p>
+    </div>
+{% endif %}
+
+
 {% endblock %}

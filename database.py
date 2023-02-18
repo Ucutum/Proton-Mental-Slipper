@@ -20,11 +20,11 @@ class Database:
             return self.cur.fetchall()
         else:
             if modif == "day":
-                modif = f"{datetime.date.today().year}.{datetime.date.today().month}.{datetime.date.today().day}"
+                modif = f"{str(datetime.date.today().year).rjust(2, '0')}.{str(datetime.date.today().month).rjust(2, '0')}.{str(datetime.date.today().day).rjust(2, '0')}"
             if modif == "month":
-                modif = f"{datetime.date.today().year}.{datetime.date.today().month}.%"
+                modif = f"{str(datetime.date.today().year).rjust(2, '0')}.{str(datetime.date.today().month).rjust(2, '0')}.%"
             if modif == "year":
-                modif = f"{datetime.date.today().year}.%.%"
+                modif = f"{str(datetime.date.today().year).rjust(2, '0')}.%.%"
             if modif == "all":
                 modif = "%.%.%"
             self.cur.execute('''SELECT * FROM data
