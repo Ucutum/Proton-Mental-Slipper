@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 {% block content %}
 
-<h1>GreenHouse</h1>
+<h1>Управление теплицей</h1>
 
 <style>
     th.row_name {
@@ -117,6 +117,13 @@
             </tbody>
         </table>
     </div>
+</div>
+
+<div class="mb-3">
+    <button name="emergency" class="genric-btn warning-border radius e-large mt-4"
+        onclick="updateEmergencyManagement()">Экстренное управление</button>
+    <p name="emergency_title" class="mt-1">Экстренное управление вsключено</p>
+    <a href="/settings" class="genric-btn info circle arrow ml-3">Настройки<span class="lnr lnr-arrow-right"></span></a>
 </div>
 
 <script src="{{ url_for('static', filename='js/device.js') }}"></script>

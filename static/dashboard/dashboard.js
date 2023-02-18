@@ -237,17 +237,6 @@ function drawTable(data)
     }
     s += "</tr>"
     datadata += s
-
-    if (i == 0)
-    {
-      s = `<thead>
-      <tr>
-      ${datahead}
-      </tr>
-      </thead>
-      ${datadata}`
-      document.getElementById("lastdatatable").innerHTML = s
-    }
   }
   s = `<thead>
     <tr>
@@ -257,6 +246,34 @@ function drawTable(data)
     ${datadata}
     `
   document.getElementById("datatable").innerHTML = s
+
+
+  // now data
+  datahead = ""
+  datahead += `<th scope='col'>Время</th>`
+  for (var i = 0; i < data["headers"].length; i++)
+  {
+    datahead += `<th scope='col'>${ getReplacedElement(data["headers"][i]) }</th>`
+  }
+  datadata = ""
+  var i = data["times"].length - 1
+  s = "<tr>"
+  s += `<th>${data["times"][i]}</th>`
+  for (var j = 0; j < data["headers"].length; j++)
+  {
+    s += `<th>${data["data"][j][i]}</th>`
+  }
+  s += "</tr>"
+  datadata += s
+
+  s = `<thead>
+    <tr>
+    ${datahead}
+    </tr>
+    </thead>
+    ${datadata}
+    `
+  document.getElementById("lastdatatable").innerHTML = s
 }
 
 

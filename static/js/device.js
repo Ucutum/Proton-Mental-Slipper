@@ -16,6 +16,11 @@ const device_values_url = "/api/device_values/"
 async function updateDevice(device_name, update=true)
 {
     var devise = document.getElementsByName(device_name)[0]
+    if (devise.classList.contains("disable"))
+    {
+        return
+    }
+
     var devise_title = document.getElementsByName(device_name + "_state")[0]
     var on_state = device_data[device_name][1]
     var ton_state = device_data[device_name][2]
@@ -60,6 +65,7 @@ async function updateDevice(device_name, update=true)
                 devise.classList.add("success-border")
             }
             devise_title.innerHTML = toff_state
+            updateVision()
         }
     };
     
@@ -83,11 +89,14 @@ var data = {
     "temp_1": 0,
     "temp_2": 0,
     "temp_3": 0,
+    "threshold_temp": 0,
     "temp_4": 0,
     "air_1": 0,
     "air_2": 0,
     "air_3": 0,
+    "threshold_air": 0,
     "air_4": 0,
+    "threshold_soil": 0,
     "soil_1": 0,
     "soil_2": 0,
     "soil_3": 0,
@@ -96,14 +105,99 @@ var data = {
     "soil_6": 0
 }
 
-function updateSensord()
+
+emergency_management = false
+
+
+function updateEmergencyManagement()
 {
-    document.getElementsByName("window_par")[0].innerHTML = Math.round((
+    btn = document.getElementsByName("emergency")[0]
+    title = document.getElementsByName("emergency_title")[0]
+    emergency_management = !emergency_management
+    if (emergency_management)
+    {
+        btn.classList.remove("warning-border")
+        btn.classList.add("warning")
+        title.innerHTML = "Экстренное управление включено"
+
+        updateVision()
+    }
+    else
+    {
+        btn.classList.remove("warning")
+        btn.classList.add("warning-border")
+        title.innerHTML = "Экстренное управление выключено"
+    }
+}
+
+
+function updateElementVision(el, value, threshold)
+{
+    if (value <= threshold && !emergency_management)
+    {
+        if (el.classList.contains("success"))
+        {
+            el.classList.add("disable")
+        }
+        else if (el.classList.contains("success-border"))
+        {
+            el.classList.add("disable")
+        }
+    }
+    else
+    {
+        if (el.classList.contains("danger"))
+        {
+            el.classList.remove("disable")
+        }
+        else if (el.classList.contains("success"))
+        {
+            el.classList.remove("disable")
+        }
+        else if (el.classList.contains("danger-border"))
+        {
+            el.classList.remove("disable")
+        }
+        else if (el.classList.contains("success-border"))
+        {
+            el.classList.remove("disable")
+        }
+    }
+}
+
+
+function updateVision()
+{
+    med_temp = Math.round((
         data["temp_1"] + data["temp_2"] + data["temp_3"] + data["temp_4"]
     ) / 4 * 100) / 100
-    document.getElementsByName("humidification_par")[0].innerHTML = Math.round((
+    el = document.getElementsByName("window")[0]
+    updateElementVision(el, med_temp, data["threshold_temp"])
+    med_air = Math.round((
         data["air_1"] + data["air_2"] + data["air_3"] + data["air_4"]
     ) / 4 * 100) / 100
+    el = document.getElementsByName("humidification")[0]
+    updateElementVision(el, med_air, data["threshold_air"])
+    for (let i = 1; i <= 6; i++)
+    {
+        v = data["soil_" + i.toString()]
+        el = document.getElementsByName("watering_" + i.toString())[0]
+        updateElementVision(el, v, data["threshold_soil"])
+    }
+}
+
+
+function updateSensord()
+{
+    med_temp = Math.round((
+        data["temp_1"] + data["temp_2"] + data["temp_3"] + data["temp_4"]
+    ) / 4 * 100) / 100
+    document.getElementsByName("window_par")[0].innerHTML = med_temp
+    el = document.getElementsByName("window")[0]
+    med_air = Math.round((
+        data["air_1"] + data["air_2"] + data["air_3"] + data["air_4"]
+    ) / 4 * 100) / 100
+    document.getElementsByName("humidification_par")[0].innerHTML = med_air
     document.getElementsByName("watering_1_par")[0].innerHTML = Math.round((
         data["soil_1"]) * 100) / 100
     document.getElementsByName("watering_2_par")[0].innerHTML = Math.round((
@@ -116,6 +210,7 @@ function updateSensord()
         data["soil_5"]) * 100) / 100
     document.getElementsByName("watering_6_par")[0].innerHTML = Math.round((
         data["soil_6"]) * 100) / 100
+    updateVision()
 }
 
 var n = Object.keys(data)[0]

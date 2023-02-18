@@ -69,7 +69,7 @@ def index():
 @app.route("/home")
 def home():
     global observating
-    return render_template("home.html", title="Home", observations=observating)
+    return render_template("home.html", title="Домашняя страница", observations=observating)
 
 
 @app.route("/start_observations")
@@ -109,12 +109,12 @@ def observations():
 
 @app.route("/about")
 def about():
-    return render_template("about.html", title="About")
+    return render_template("about.html", title="О нас и об этом приложении")
 
 
 @app.route("/contact")
 def contact():
-    return render_template("contact.html", title="Contact")
+    return render_template("contact.html", title="Контакты")
 
 
 @app.route("/alldata")
@@ -204,13 +204,17 @@ def greenhouse():
                 return json.dumps({"state": device_statuses[attr]})
         return json.dumps({"state": False})
     return render_template(
-        "greenhouse.html", title="Greenhouse", states=device_statuses)
+        "greenhouse.html", title="Управление теплицей", states=device_statuses)
 
 
 @app.route("/data/<datatype>")
 def data(datatype):
     return render_template(
-        "data.html", title=str(datatype).capitalize(), datatype=datatype)
+        "data.html", title=str({
+            "temp": "Температура воздуха",
+            "air": "Влажность воздуха",
+            "soil": "Влажность почвы"
+            }.get(datatype, "")).capitalize(), datatype=datatype)
 
 
 def get_temp_med():
@@ -254,6 +258,13 @@ def api_temp(name):
     return json.dumps({"temp": temp["temperature"]})
 
 
+_settings = {
+    "threshold_temp": 30,
+    "threshold_air": 65,
+    "threshold_soil": 70
+}
+
+
 @app.route("/api/device_values/<par>")
 def api_device_values(par):
     i = par[-1:]
@@ -264,6 +275,7 @@ def api_device_values(par):
                 headers={"X-Auth-Token": X_AUTH_TOKEN}).content
                 )["temperature"], 2)
     elif par[:-2] == "air":
+        print(i)
         d = round(json.loads(
             requests.get(
                 "https://dt.miet.ru/ppo_it/api/temp_hum/" + str(i),
@@ -275,6 +287,10 @@ def api_device_values(par):
                 "https://dt.miet.ru/ppo_it/api/hum/" + str(i),
                 headers={"X-Auth-Token": X_AUTH_TOKEN}).content
                 )["humidity"], 2)
+    elif par in ["threshold_temp", "threshold_air", "threshold_soil"]:
+        d = _settings[par]
+    else:
+        d = None
     return json.dumps({"val": d})
 
 
@@ -289,6 +305,23 @@ def api_get_data(datatype, modif):
     return {"data": data, "times": times, "headers": sensors}
 
 
+# @app.route("/api/settings/<parameter>")
+# def api_settings(parameter):
+#     return json.dumps({"val": _settigns.get(parameter, None)})
+
+
+@app.route("/settings", methods=["GET", "POST"])
+def settings():
+    global _settings
+
+    if request.method == "POST":
+        _settings["threshold_temp"] = int(request.form["threshold_temp"])
+        _settings["threshold_air"] = int(request.form["threshold_air"])
+        _settings["threshold_soil"] = int(request.form["threshold_soil"])
+
+    return render_template("settings.html", title="Настройки", settings=_settings)
+
+
 @app.route("/adddata", methods=["GET", "POST"])
 def adddata():
     if request.method == "POST":
@@ -299,7 +332,7 @@ def adddata():
         # db = Database(get_db())
         # db.add_temp(source, date, time, value)
         # .rjust(2, '0')
-    return render_template("adddata.html", title="Add Data")
+    return render_template("adddata.html", title="Добавить данные")
 
 
 if __name__ == "__main__":

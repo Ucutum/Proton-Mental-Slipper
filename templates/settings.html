@@ -1,0 +1,21 @@
+{% extends "index.html" %}
+{% block content %}
+
+<h1>Настройки</h1>
+
+<div>
+    <form method="POST">
+        <h6>Порог температуры</h6>
+        <input name="threshold_temp" type="number"
+            class="single-input-primary" value="{{ settings['threshold_temp'] }}">
+        <h6>Порог влажности воздуха</h6>
+        <input name="threshold_air" type="number"
+            class="single-input-primary" value="{{ settings['threshold_air'] }}">
+        <h6>Порог влажности почвы</h6>
+        <input name="threshold_soil" type="number"
+            class="single-input-primary" value="{{ settings['threshold_soil'] }}">
+        <button type="submit" class="genric-btn success circle arrow">Применить<span class="lnr lnr-arrow-right"></span></button>
+    </form>
+</div>
+
+{% endblock %}
