@@ -40,7 +40,7 @@ async function loadData (con=true) {
   console.log(select_value)
 
   var xhr = new XMLHttpRequest()
-  xhr.open("GET", data_url + select_value.toString(), false)
+  xhr.open("GET", data_url + select_value.toString(), true)
 
   xhr.onload = function() {
       console.log(`Загружено: ${xhr.status}`);
@@ -64,7 +64,7 @@ async function loadData (con=true) {
     xhr.send( null )
 
     if (is_working && con){
-        setTimeout(loadData, 1 * 1000)
+        setTimeout(loadData, 10 * 1000)
     }
 }
 

@@ -3,7 +3,6 @@ import json
 import requests
 import sqlite3
 import os
-from graph import make_graph
 from database import Database
 import datetime
 from time import sleep
@@ -69,7 +68,9 @@ def index():
 @app.route("/home")
 def home():
     global observating
-    return render_template("home.html", title="Домашняя страница", observations=observating)
+    return render_template(
+        "home.html", title="Домашняя страница",
+        observations=observating)
 
 
 @app.route("/start_observations")
@@ -104,22 +105,17 @@ def observations():
                 db.add(datatype, datatype + "_" + str(source), date, time, d)
             db.add(datatype,  datatype + "_med", date, time, sum_ / (len(SENSOR_TYPES[datatype]) - 1))
         print()
-        sleep(1)
+        sleep(10)
 
 
 @app.route("/about")
 def about():
-    return render_template("about.html", title="О нас и об этом приложении")
+    return render_template("about.html", title="О нас")
 
 
 @app.route("/contact")
 def contact():
     return render_template("contact.html", title="Контакты")
-
-
-@app.route("/alldata")
-def alldata():
-    return redirect(url_for("home"), code=302)
 
 
 @app.route("/temp")
@@ -182,8 +178,7 @@ def patch_device(device, attr):
         url = "https://dt.miet.ru/ppo_it/api/watering"
         par = {"id": int(device[-1])}
     par["state"] = int(attr)
-    par["X-Auth-Token"] = X_AUTH_TOKEN
-    requests.patch(url, par)
+    requests.patch(url, par, headers={"X-Auth-Token": X_AUTH_TOKEN})
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -228,20 +223,6 @@ def get_temp_med():
                 )["temperature"]
         a += temp
     a /= len(SENSORS_TEMP) - 1
-    return a
-
-
-def get_air_med():
-    a = 0
-    for i in range(1, len(SENSORS_AIR) - 1 + 1):
-        air = json.loads(
-            requests.get(
-                "https://dt.miet.ru/ppo_it/api/temp_hum/" + str(i),
-                headers={"X-Auth-Token": X_AUTH_TOKEN}
-                ).content
-                )["humidity"]
-        a += air
-    a /= len(SENSORS_AIR) - 1
     return a
 
 
@@ -303,11 +284,6 @@ def api_get_data(datatype, modif):
     data = [list(map(lambda x: x[-1], db.get(datatype, i, modif))) for i in sensors]
     times = list(map(lambda x: x[3], db.get(datatype, sensors[-1], modif)))
     return {"data": data, "times": times, "headers": sensors}
-
-
-# @app.route("/api/settings/<parameter>")
-# def api_settings(parameter):
-#     return json.dumps({"val": _settigns.get(parameter, None)})
 
 
 @app.route("/settings", methods=["GET", "POST"])

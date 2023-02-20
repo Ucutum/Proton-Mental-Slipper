@@ -27,8 +27,6 @@ async function updateDevice(device_name, update=true)
     var off_state = device_data[device_name][0]
     var toff_state = device_data[device_name][3]
 
-    console.log(devise)
-
     var xhr = new XMLHttpRequest()
     xhr.open("POST", "/greenhouse", false)
 
@@ -65,7 +63,10 @@ async function updateDevice(device_name, update=true)
                 devise.classList.add("success-border")
             }
             devise_title.innerHTML = toff_state
-            updateVision()
+            if (update)
+            {
+                updateVision()
+            }
         }
     };
     
@@ -262,5 +263,6 @@ for (let i = 1; i <= 6; i++)
 {
     updateDevice('watering_' + i.toString(), update=false)
 }
+updateVision()
 
 setTimeout(updateData, 10)
