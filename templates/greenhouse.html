@@ -19,6 +19,10 @@
     th.row_button {
         width: 200px
     }
+    #disable {
+        pointer-events: none;
+        color: black;
+    }
 </style>
 
 <div style="overflow-x: scroll;">
@@ -31,6 +35,7 @@
                     <th>Пораметр</th>
                     <th>Значение</th>
                     <th>Управление</th>
+                    <th>Комментарий</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,6 +48,7 @@
                         <button onclick="updateDevice('window')"
                             name="window" class="genric-btn success" style="border-radius: 10px;">Форточка</button>
                     </th>
+                    <th name="window_comment" class="row_comment"></th>
                 </tr>
                 <tr>
                     <th class="row_name">Система увлажнения</th>
@@ -53,6 +59,7 @@
                         <button onclick="updateDevice('humidification')"
                             name="humidification" class="genric-btn success circle ml-1">Увлажнение</button>
                     </th>
+                    <th name="humidification_comment" class="row_comment"></th>
                 </tr>
                 <tr>
                     <th class="row_name">Бороздка 1</th>
@@ -63,6 +70,7 @@
                         <button onclick="updateDevice('watering_1')"
                                 name="watering_1" class="genric-btn success-border circle">Бороздка</button>
                     </th>
+                    <th name="watering_1_comment" class="row_comment"></th>
                 </tr>
                 <tr>
                     <th class="row_name">Бороздка 2</th>
@@ -73,6 +81,7 @@
                         <button onclick="updateDevice('watering_2')"
                                 name="watering_2" class="genric-btn success-border circle">Бороздка</button>
                     </th>
+                    <th name="watering_2_comment" class="row_comment"></th>
                 </tr>
                 <tr>
                     <th class="row_name">Бороздка 3</th>
@@ -83,6 +92,7 @@
                         <button onclick="updateDevice('watering_3')"
                                 name="watering_3" class="genric-btn success-border circle">Бороздка</button>
                     </th>
+                    <th name="watering_3_comment" class="row_comment"></th>
                 </tr>
                 <tr>
                     <th class="row_name">Бороздка 4</th>
@@ -93,6 +103,7 @@
                         <button onclick="updateDevice('watering_4')"
                                 name="watering_4" class="genric-btn success-border circle">Бороздка</button>
                     </th>
+                    <th name="watering_4_comment" class="row_comment"></th>
                 </tr>
                 <tr>
                     <th class="row_name">Бороздка 5</th>
@@ -103,6 +114,7 @@
                         <button onclick="updateDevice('watering_5')"
                                 name="watering_5" class="genric-btn success-border circle">Бороздка</button>
                     </th>
+                    <th name="watering_5_comment" class="row_comment"></th>
                 </tr>
                 <tr>
                     <th class="row_name">Бороздка 6</th>
@@ -113,17 +125,48 @@
                         <button onclick="updateDevice('watering_6')"
                                 name="watering_6" class="genric-btn success-border circle">Бороздка</button>
                     </th>
+                    <th name="watering_6_comment" class="row_comment"></th>
                 </tr>
             </tbody>
         </table>
     </div>
 </div>
 
+<h1 class="mt-4">Текущие настройки системы</h1>
+<div style="overflow-x: scroll;">
+    <div class="chart-container" style="position: relative;">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 150px"> Величина </th>
+                    <th style="width: 150px"> Значение </th>
+                    <th style="width: 300px"> Описание </th>
+                </tr>
+            </thead>
+            <tr>
+                <th>T (градусы)</th>
+                <th name="threshold_temp"></th>
+                <th>Пороговая средняя температура воздуха</th>
+            </tr>
+            <tr>
+                <th>H (%)</th>
+                <th name="threshold_air"></th>
+                <th>Пороговая средняя влажность воздуха</th>
+            </tr>
+            <tr>
+                <th>Hb (%)</th>
+                <th name="threshold_soil"></th>
+                <th>Пороговая влажность почвы бороздки</th>
+            </tr>
+        </table>
+    </div>
+</div>
+<a href="/settings" class="genric-btn info circle arrow">Изменить настройки<span class="lnr lnr-arrow-right"></span></a>
+
 <div class="mb-3">
-    <button name="emergency" class="genric-btn warning-border radius e-large mt-4"
+    <button name="emergency" class="genric-btn danger-border radius e-large mt-4"
         onclick="updateEmergencyManagement()">Экстренное управление</button>
-    <p name="emergency_title" class="mt-1">Экстренное управление вsключено</p>
-    <a href="/settings" class="genric-btn info circle arrow ml-3">Настройки<span class="lnr lnr-arrow-right"></span></a>
+    <p name="emergency_title" class="mt-1">Экстренное управление выключено</p>
 </div>
 
 <script src="{{ url_for('static', filename='js/device.js') }}"></script>

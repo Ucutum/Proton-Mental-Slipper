@@ -117,51 +117,75 @@ function updateEmergencyManagement()
     emergency_management = !emergency_management
     if (emergency_management)
     {
-        btn.classList.remove("warning-border")
-        btn.classList.add("warning")
+        btn.classList.remove("danger-border")
+        btn.classList.add("danger")
         title.innerHTML = "Экстренное управление включено"
 
         updateVision()
     }
     else
     {
-        btn.classList.remove("warning")
-        btn.classList.add("warning-border")
+        btn.classList.remove("danger")
+        btn.classList.add("danger-border")
         title.innerHTML = "Экстренное управление выключено"
     }
 }
 
 
-function updateElementVision(el, value, threshold)
+var last_texts = {
+
+}
+
+
+function updateElementVision(el, value, threshold, more)
 {
-    if (value <= threshold && !emergency_management)
+    if (more)
     {
-        if (el.classList.contains("success"))
+        b = value >= threshold
+    }
+    else
+    {
+        b = value <= threshold
+    }
+
+    if ((b && !emergency_management))
+    {
+        if (el.classList.contains("success") || el.classList.contains("success-border"))
         {
             el.classList.add("disable")
-        }
-        else if (el.classList.contains("success-border"))
-        {
-            el.classList.add("disable")
+            el.id = "disable"
+            if (el.innerHTML != "Управление запрещено")
+            {
+                last_texts[el.name] = el.innerHTML
+            }
+            el.innerHTML = "Управление запрещено"
+            comment = ""
+            if (el.name == "window")
+            {
+                comment = `Средняя температура воздуха в теплице меньше, чем T = ${data['threshold_temp']} градусов`
+            }
+            else if (el.name == "humidification")
+            {
+                comment = `Средняя влажность воздуха в теплице больше, чем H = ${data['threshold_air']} %`
+            }
+            else
+            {
+                comment = `Влажность этой бороздки в теплице больше, чем Hb = ${data['threshold_soil']} %`
+            }
+            document.getElementsByName(el.name + "_comment")[0].innerHTML = comment
         }
     }
     else
     {
-        if (el.classList.contains("danger"))
+        if (el.classList.contains("danger") || el.classList.contains("success") || el.classList.contains("danger-border") || el.classList.contains("success-border"))
         {
             el.classList.remove("disable")
-        }
-        else if (el.classList.contains("success"))
-        {
-            el.classList.remove("disable")
-        }
-        else if (el.classList.contains("danger-border"))
-        {
-            el.classList.remove("disable")
-        }
-        else if (el.classList.contains("success-border"))
-        {
-            el.classList.remove("disable")
+            el.id = "n"
+            if (Object.keys(last_texts).includes(el.name) && (el.innerHTML == "Управление запрещено"))
+            {
+                el.innerHTML = last_texts[el.name]
+            }
+            document.getElementsByName(el.name + "_comment")[0].innerHTML = ""
         }
     }
 }
@@ -173,17 +197,17 @@ function updateVision()
         data["temp_1"] + data["temp_2"] + data["temp_3"] + data["temp_4"]
     ) / 4 * 100) / 100
     el = document.getElementsByName("window")[0]
-    updateElementVision(el, med_temp, data["threshold_temp"])
+    updateElementVision(el, med_temp, data["threshold_temp"], false)
     med_air = Math.round((
         data["air_1"] + data["air_2"] + data["air_3"] + data["air_4"]
     ) / 4 * 100) / 100
     el = document.getElementsByName("humidification")[0]
-    updateElementVision(el, med_air, data["threshold_air"])
+    updateElementVision(el, med_air, data["threshold_air"], true)
     for (let i = 1; i <= 6; i++)
     {
         v = data["soil_" + i.toString()]
         el = document.getElementsByName("watering_" + i.toString())[0]
-        updateElementVision(el, v, data["threshold_soil"])
+        updateElementVision(el, v, data["threshold_soil"], true)
     }
 }
 
@@ -211,6 +235,11 @@ function updateSensord()
         data["soil_5"]) * 100) / 100
     document.getElementsByName("watering_6_par")[0].innerHTML = Math.round((
         data["soil_6"]) * 100) / 100
+    
+    document.getElementsByName("threshold_temp")[0].innerHTML = data["threshold_temp"]
+    document.getElementsByName("threshold_air")[0].innerHTML = data["threshold_air"]
+    document.getElementsByName("threshold_soil")[0].innerHTML = data["threshold_soil"]
+
     updateVision()
 }
 

@@ -13,7 +13,8 @@ SECRET_KEY = "fkjdaskFDKKLDlkjkfd&&&&&^#$*&)#jlksdjf"
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-app.config.update(dict(DATABASE=os.path.join(app.root_path, "database.sqlite")))
+app.config.update(dict(DATABASE=os.path.join(
+    app.root_path, "database.sqlite")))
 
 X_AUTH_TOKEN = "8HxIhi"
 
@@ -65,6 +66,7 @@ def index():
     return render_template("index.html", title="Index")
 
 
+@app.route("/")
 @app.route("/home")
 def home():
     global observating
@@ -86,10 +88,10 @@ def observations():
     print("start observations")
     while True:
         now = datetime.datetime.now()
-        date = f"{str(now.year).rjust(2, '0')}.{str(now.month).rjust(2, '0')}." +\
-            f"{str(now.day).rjust(2, '0')}"
-        time = f"{str(now.hour).rjust(2, '0')}:{str(now.minute).rjust(2, '0')}:" +\
-            f"{str(now.second).rjust(2, '0')}"
+        date = f"{str(now.year).rjust(2, '0')}." +\
+            f"{str(now.month).rjust(2, '0')}.{str(now.day).rjust(2, '0')}"
+        time = f"{str(now.hour).rjust(2, '0')}:" +\
+            f"{str(now.minute).rjust(2, '0')}:{str(now.second).rjust(2, '0')}"
         for datatype in ["temp", "air", "soil"]:
             print("observation", datatype, end="   ")
             sum_ = 0
@@ -99,13 +101,16 @@ def observations():
                         SENSORS_API[datatype] + str(source),
                         headers={"X-Auth-Token": X_AUTH_TOKEN}
                         ).content
-                        )["temperature" if (datatype == "temp") else "humidity"]
+                        )["temperature" if (
+                            datatype == "temp") else "humidity"]
                 print(d, end=" ")
                 sum_ += d
                 db.add(datatype, datatype + "_" + str(source), date, time, d)
-            db.add(datatype,  datatype + "_med", date, time, sum_ / (len(SENSOR_TYPES[datatype]) - 1))
+            db.add(
+                datatype,  datatype + "_med", date, time, round(
+                    sum_ / (len(SENSOR_TYPES[datatype]) - 1), 3))
         print()
-        sleep(10)
+        sleep(5)
 
 
 @app.route("/about")
@@ -181,7 +186,6 @@ def patch_device(device, attr):
     requests.patch(url, par, headers={"X-Auth-Token": X_AUTH_TOKEN})
 
 
-@app.route("/", methods=["GET", "POST"])
 @app.route("/greenhouse", methods=["GET", "POST"])
 def greenhouse():
     global device_statuses
@@ -190,7 +194,8 @@ def greenhouse():
         d = json.loads(request.data)
 
         if not d["update"]:
-            return json.dumps({"state": device_statuses.get(d["devise"], False)})
+            return json.dumps(
+                {"state": device_statuses.get(d["devise"], False)})
 
         for attr in device_statuses.keys():
             if d["devise"] == attr:
@@ -281,7 +286,9 @@ def api_get_data(datatype, modif):
     sensors = SENSOR_TYPES.get(datatype, [])[:]
     if datatype == "soil":
         sensors.remove("soil_med")
-    data = [list(map(lambda x: x[-1], db.get(datatype, i, modif))) for i in sensors]
+    data = [
+        list(
+            map(lambda x: x[-1], db.get(datatype, i, modif))) for i in sensors]
     times = list(map(lambda x: x[3], db.get(datatype, sensors[-1], modif)))
     return {"data": data, "times": times, "headers": sensors}
 
@@ -295,7 +302,8 @@ def settings():
         _settings["threshold_air"] = int(request.form["threshold_air"])
         _settings["threshold_soil"] = int(request.form["threshold_soil"])
 
-    return render_template("settings.html", title="Настройки", settings=_settings)
+    return render_template(
+        "settings.html", title="Настройки", settings=_settings)
 
 
 @app.route("/adddata", methods=["GET", "POST"])
