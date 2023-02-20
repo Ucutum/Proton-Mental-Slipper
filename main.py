@@ -3,7 +3,6 @@ import json
 import requests
 import sqlite3
 import os
-from graph import make_graph
 from database import Database
 import datetime
 from time import sleep
@@ -14,7 +13,8 @@ SECRET_KEY = "fkjdaskFDKKLDlkjkfd&&&&&^#$*&)#jlksdjf"
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-app.config.update(dict(DATABASE=os.path.join(app.root_path, "database.sqlite")))
+app.config.update(dict(DATABASE=os.path.join(
+    app.root_path, "database.sqlite")))
 
 X_AUTH_TOKEN = "8HxIhi"
 
@@ -66,9 +66,13 @@ def index():
     return render_template("index.html", title="Index")
 
 
+@app.route("/")
 @app.route("/home")
 def home():
-    return render_template("home.html", title="Home")
+    global observating
+    return render_template(
+        "home.html", title="Домашняя страница",
+        observations=observating)
 
 
 @app.route("/start_observations")
@@ -84,10 +88,10 @@ def observations():
     print("start observations")
     while True:
         now = datetime.datetime.now()
-        date = f"{now.year}.{now.month}." +\
-            f"{now.day}"
-        time = f"{now.hour}:{now.minute}:" +\
-            f"{now.second}"
+        date = f"{str(now.year).rjust(2, '0')}." +\
+            f"{str(now.month).rjust(2, '0')}.{str(now.day).rjust(2, '0')}"
+        time = f"{str(now.hour).rjust(2, '0')}:" +\
+            f"{str(now.minute).rjust(2, '0')}:{str(now.second).rjust(2, '0')}"
         for datatype in ["temp", "air", "soil"]:
             print("observation", datatype, end="   ")
             sum_ = 0
@@ -97,28 +101,26 @@ def observations():
                         SENSORS_API[datatype] + str(source),
                         headers={"X-Auth-Token": X_AUTH_TOKEN}
                         ).content
-                        )["temperature" if (datatype == "temp") else "humidity"]
+                        )["temperature" if (
+                            datatype == "temp") else "humidity"]
                 print(d, end=" ")
                 sum_ += d
                 db.add(datatype, datatype + "_" + str(source), date, time, d)
-            db.add(datatype,  datatype + "_med", date, time, sum_ / (len(SENSOR_TYPES[datatype]) - 1))
+            db.add(
+                datatype,  datatype + "_med", date, time, round(
+                    sum_ / (len(SENSOR_TYPES[datatype]) - 1), 3))
         print()
-        sleep(10)
+        sleep(5)
 
 
 @app.route("/about")
 def about():
-    return render_template("about.html", title="About")
+    return render_template("about.html", title="О нас")
 
 
 @app.route("/contact")
 def contact():
-    return render_template("contact.html", title="Contact")
-
-
-@app.route("/alldata")
-def alldata():
-    return redirect(url_for("home"), code=302)
+    return render_template("contact.html", title="Контакты")
 
 
 @app.route("/temp")
@@ -136,21 +138,103 @@ def soil():
     return redirect(url_for("data", datatype="soil"), code=302)
 
 
-@app.route("/")
-@app.route("/greenhouse")
+device_api_patch_urls = {
+    "window": "https://dt.miet.ru/ppo_it/api/fork_drive",
+    "humidification": "https://dt.miet.ru/ppo_it/api/total_hum",
+    "watering_1": "https://dt.miet.ru/ppo_it/api/watering",
+    "watering_2": "https://dt.miet.ru/ppo_it/api/watering",
+    "watering_3": "https://dt.miet.ru/ppo_it/api/watering",
+    "watering_4": "https://dt.miet.ru/ppo_it/api/watering",
+    "watering_5": "https://dt.miet.ru/ppo_it/api/watering",
+    "watering_6": "https://dt.miet.ru/ppo_it/api/watering"
+}
+
+device_api_get_urls = {
+    "window": False,
+    "humidification": False,
+    "watering_1": False,
+    "watering_2": False,
+    "watering_3": False,
+    "watering_4": False,
+    "watering_5": False,
+    "watering_6": False
+}
+
+device_statuses = {
+    "window": False,
+    "humidification": False,
+    "watering_1": False,
+    "watering_2": False,
+    "watering_3": False,
+    "watering_4": False,
+    "watering_5": False,
+    "watering_6": False
+}
+
+
+def patch_device(device, attr):
+    if device == "window":
+        url = "https://dt.miet.ru/ppo_it/api/fork_drive/"
+        par = {}
+    elif device == "humidification":
+        url = "https://dt.miet.ru/ppo_it/api/total_hum"
+        par = {}
+    elif device[:-2] == "watering":
+        url = "https://dt.miet.ru/ppo_it/api/watering"
+        par = {"id": int(device[-1])}
+    par["state"] = int(attr)
+    requests.patch(url, par, headers={"X-Auth-Token": X_AUTH_TOKEN})
+
+
+@app.route("/greenhouse", methods=["GET", "POST"])
 def greenhouse():
+    global device_statuses
+
+    if request.method == "POST":
+        d = json.loads(request.data)
+
+        if not d["update"]:
+            return json.dumps(
+                {"state": device_statuses.get(d["devise"], False)})
+
+        for attr in device_statuses.keys():
+            if d["devise"] == attr:
+                device_statuses[attr] = not device_statuses[attr]
+                patch_device(attr, device_statuses[attr])
+                return json.dumps({"state": device_statuses[attr]})
+        return json.dumps({"state": False})
     return render_template(
-        "greenhouse.html", title="Greenhouse")
+        "greenhouse.html", title="Управление теплицей", states=device_statuses)
 
 
 @app.route("/data/<datatype>")
 def data(datatype):
     return render_template(
-        "data.html", title=str(datatype).capitalize(), datatype=datatype)
+        "data.html", title=str({
+            "temp": "Температура воздуха",
+            "air": "Влажность воздуха",
+            "soil": "Влажность почвы"
+            }.get(datatype, "")).capitalize(), datatype=datatype)
+
+
+def get_temp_med():
+    a = 0
+    for i in range(1, len(SENSORS_TEMP) - 1 + 1):
+        temp = json.loads(
+            requests.get(
+                "https://dt.miet.ru/ppo_it/api/temp_hum/" + str(i),
+                headers={"X-Auth-Token": X_AUTH_TOKEN}
+                ).content
+                )["temperature"]
+        a += temp
+    a /= len(SENSORS_TEMP) - 1
+    return a
 
 
 @app.route("/api/temp/<name>")
 def api_temp(name):
+    if name == "med":
+        return json.dumps({"temp": get_temp_med()})
     temp = json.loads(
         requests.get(
             "https://dt.miet.ru/ppo_it/api/temp_hum/" + str(name),
@@ -160,13 +244,66 @@ def api_temp(name):
     return json.dumps({"temp": temp["temperature"]})
 
 
+_settings = {
+    "threshold_temp": 30,
+    "threshold_air": 65,
+    "threshold_soil": 70
+}
+
+
+@app.route("/api/device_values/<par>")
+def api_device_values(par):
+    i = par[-1:]
+    if par[:-2] == "temp":
+        d = round(json.loads(
+            requests.get(
+                "https://dt.miet.ru/ppo_it/api/temp_hum/" + str(i),
+                headers={"X-Auth-Token": X_AUTH_TOKEN}).content
+                )["temperature"], 2)
+    elif par[:-2] == "air":
+        print(i)
+        d = round(json.loads(
+            requests.get(
+                "https://dt.miet.ru/ppo_it/api/temp_hum/" + str(i),
+                headers={"X-Auth-Token": X_AUTH_TOKEN}).content
+                )["humidity"], 2)
+    elif par[:-2] == "soil":
+        d = round(json.loads(
+            requests.get(
+                "https://dt.miet.ru/ppo_it/api/hum/" + str(i),
+                headers={"X-Auth-Token": X_AUTH_TOKEN}).content
+                )["humidity"], 2)
+    elif par in ["threshold_temp", "threshold_air", "threshold_soil"]:
+        d = _settings[par]
+    else:
+        d = None
+    return json.dumps({"val": d})
+
+
 @app.route("/api/get_data/<datatype>/<modif>")
 def api_get_data(datatype, modif):
     db = Database(get_db())
-    sensors = SENSOR_TYPES.get(datatype, [])
-    data = [list(map(lambda x: x[-1], db.get(datatype, i, modif))) for i in sensors]
+    sensors = SENSOR_TYPES.get(datatype, [])[:]
+    if datatype == "soil":
+        sensors.remove("soil_med")
+    data = [
+        list(
+            map(lambda x: x[-1], db.get(datatype, i, modif))) for i in sensors]
     times = list(map(lambda x: x[3], db.get(datatype, sensors[-1], modif)))
     return {"data": data, "times": times, "headers": sensors}
+
+
+@app.route("/settings", methods=["GET", "POST"])
+def settings():
+    global _settings
+
+    if request.method == "POST":
+        _settings["threshold_temp"] = int(request.form["threshold_temp"])
+        _settings["threshold_air"] = int(request.form["threshold_air"])
+        _settings["threshold_soil"] = int(request.form["threshold_soil"])
+
+    return render_template(
+        "settings.html", title="Настройки", settings=_settings)
 
 
 @app.route("/adddata", methods=["GET", "POST"])
@@ -178,7 +315,8 @@ def adddata():
         value = request.form["value"]
         # db = Database(get_db())
         # db.add_temp(source, date, time, value)
-    return render_template("adddata.html", title="Add Data")
+        # .rjust(2, '0')
+    return render_template("adddata.html", title="Добавить данные")
 
 
 if __name__ == "__main__":

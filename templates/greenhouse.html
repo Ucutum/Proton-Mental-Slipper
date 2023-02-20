@@ -1,6 +1,174 @@
 {% extends "index.html" %}
 {% block content %}
 
-<h1>GreenHouse</h1>
+<h1>Управление теплицей</h1>
+
+<style>
+    th.row_name {
+        width: 100px
+    }
+    th.row_state {
+        width: 200px
+    }
+    th.row_now_title {
+        width: 250px
+    }
+    th.row_now {
+        width: 130px
+    }
+    th.row_button {
+        width: 200px
+    }
+    #disable {
+        pointer-events: none;
+        color: black;
+    }
+</style>
+
+<div style="overflow-x: scroll;">
+    <div class="chart-container" id="chart-container" style="position: relative;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Устройство</th>
+                    <th>Статус</th>
+                    <th>Пораметр</th>
+                    <th>Значение</th>
+                    <th>Управление</th>
+                    <th>Комментарий</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th class="row_name">Форточка</th>
+                    <th class="row_state" name="window_state">состояние</th>
+                    <th class="row_now_title">Средняя температура воздуха</th>
+                    <th class="row_now"> <p name="window_par"></p> </th>
+                    <th class="row_button">
+                        <button onclick="updateDevice('window')"
+                            name="window" class="genric-btn success" style="border-radius: 10px;">Форточка</button>
+                    </th>
+                    <th name="window_comment" class="row_comment"></th>
+                </tr>
+                <tr>
+                    <th class="row_name">Система увлажнения</th>
+                    <th class="row_state" name="humidification_state">состояная влажноять</th>
+                    <th class="row_now_title">Средняя влажность воздуха</th>
+                    <th class="row_now"> <p name="humidification_par"></p> </th>
+                    <th class="row_button">
+                        <button onclick="updateDevice('humidification')"
+                            name="humidification" class="genric-btn success circle ml-1">Увлажнение</button>
+                    </th>
+                    <th name="humidification_comment" class="row_comment"></th>
+                </tr>
+                <tr>
+                    <th class="row_name">Бороздка 1</th>
+                    <th class="row_state" name="watering_1_state">состояние</th>
+                    <th class="row_now_title">Влажность бороздки 1</th>
+                    <th class="row_now"> <p name="watering_1_par"></p> </th>
+                    <th class="row_button">
+                        <button onclick="updateDevice('watering_1')"
+                                name="watering_1" class="genric-btn success-border circle">Бороздка</button>
+                    </th>
+                    <th name="watering_1_comment" class="row_comment"></th>
+                </tr>
+                <tr>
+                    <th class="row_name">Бороздка 2</th>
+                    <th class="row_state" name="watering_2_state">состояние</th>
+                    <th class="row_now_title">Влажность бороздки 2</th>
+                    <th class="row_now"> <p name="watering_2_par"></p> </th>
+                    <th class="row_button">
+                        <button onclick="updateDevice('watering_2')"
+                                name="watering_2" class="genric-btn success-border circle">Бороздка</button>
+                    </th>
+                    <th name="watering_2_comment" class="row_comment"></th>
+                </tr>
+                <tr>
+                    <th class="row_name">Бороздка 3</th>
+                    <th class="row_state" name="watering_3_state">состояние</th>
+                    <th class="row_now_title">Влажность бороздки 3</th>
+                    <th class="row_now"> <p name="watering_3_par"></p> </th>
+                    <th class="row_button">
+                        <button onclick="updateDevice('watering_3')"
+                                name="watering_3" class="genric-btn success-border circle">Бороздка</button>
+                    </th>
+                    <th name="watering_3_comment" class="row_comment"></th>
+                </tr>
+                <tr>
+                    <th class="row_name">Бороздка 4</th>
+                    <th class="row_state" name="watering_4_state">состояние</th>
+                    <th class="row_now_title">Влажность бороздки 4</th>
+                    <th class="row_now"> <p name="watering_4_par"></p> </th>
+                    <th class="row_button">
+                        <button onclick="updateDevice('watering_4')"
+                                name="watering_4" class="genric-btn success-border circle">Бороздка</button>
+                    </th>
+                    <th name="watering_4_comment" class="row_comment"></th>
+                </tr>
+                <tr>
+                    <th class="row_name">Бороздка 5</th>
+                    <th class="row_state" name="watering_5_state">состояние</th>
+                    <th class="row_now_title">Влажность бороздки 5</th>
+                    <th class="row_now"> <p name="watering_5_par"></p> </th>
+                    <th class="row_button">
+                        <button onclick="updateDevice('watering_5')"
+                                name="watering_5" class="genric-btn success-border circle">Бороздка</button>
+                    </th>
+                    <th name="watering_5_comment" class="row_comment"></th>
+                </tr>
+                <tr>
+                    <th class="row_name">Бороздка 6</th>
+                    <th class="row_state" name="watering_6_state">состояние</th>
+                    <th class="row_now_title">Влажность бороздки 6</th>
+                    <th class="row_now"> <p name="watering_6_par"></p> </th>
+                    <th class="row_button">
+                        <button onclick="updateDevice('watering_6')"
+                                name="watering_6" class="genric-btn success-border circle">Бороздка</button>
+                    </th>
+                    <th name="watering_6_comment" class="row_comment"></th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<h1 class="mt-4">Текущие настройки системы</h1>
+<div style="overflow-x: scroll;">
+    <div class="chart-container" style="position: relative;">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 150px"> Величина </th>
+                    <th style="width: 150px"> Значение </th>
+                    <th style="width: 300px"> Описание </th>
+                </tr>
+            </thead>
+            <tr>
+                <th>T (градусы)</th>
+                <th name="threshold_temp"></th>
+                <th>Пороговая средняя температура воздуха</th>
+            </tr>
+            <tr>
+                <th>H (%)</th>
+                <th name="threshold_air"></th>
+                <th>Пороговая средняя влажность воздуха</th>
+            </tr>
+            <tr>
+                <th>Hb (%)</th>
+                <th name="threshold_soil"></th>
+                <th>Пороговая влажность почвы бороздки</th>
+            </tr>
+        </table>
+    </div>
+</div>
+<a href="/settings" class="genric-btn info circle arrow">Изменить настройки<span class="lnr lnr-arrow-right"></span></a>
+
+<div class="mb-3">
+    <button name="emergency" class="genric-btn danger-border radius e-large mt-4"
+        onclick="updateEmergencyManagement()">Экстренное управление</button>
+    <p name="emergency_title" class="mt-1">Экстренное управление выключено</p>
+</div>
+
+<script src="{{ url_for('static', filename='js/device.js') }}"></script>
 
 {% endblock %}

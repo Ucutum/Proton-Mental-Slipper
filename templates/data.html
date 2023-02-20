@@ -6,13 +6,13 @@
 <label id="datatype_{{ datatype }}"></label>
 
 <div>
-    <h1>Graph</h1>
+    <h1>График</h1>
     <select class="form-select" aria-label="Пример выбора по умолчанию"
         style="max-width: 300px" id="load_data_select" onclick="loadData(con=false)">
-    <option value="day" selected>За этот день</option>
-    <option value="month">За это месяц</option>
-    <option value="year">За этот год</option>
-    <option value="all">За все время</option>
+    <option value="all" selected>За все время</option>
+    <option value="hour">За этот час</option>
+    <option value="minute">За эту минуту</option>
+    <!-- <option value="all">За все время</option> -->
     </select>
 
     <div style="overflow-x: scroll; border: 3px solid black; border-radius: 3px;">
@@ -23,7 +23,12 @@
 </div>
 
 <div>
-    <h1>Table</h1>
+    <h1>Последние данные</h1>
+    <table class="table table-striped" id="lastdatatable"></table>
+</div>
+
+<div>
+    <h1>Динамика изменения показаний датчиков</h1>
     <div style="overflow-y: scroll; border: 3px solid black; border-radius: 3px;">
         <div class="table-container" style="position: relative; width: 100%; height: 500px">
             <table class="table table-striped" id="datatable">
